@@ -48,12 +48,6 @@ public class Percolation {
                 theMap[i][j] = tot + 2;
             }
         }
-        //System.out.println("algo count: " + algo.count());
-        //System.out.println("sites (total= " + sites.length + "): " + Arrays.toString(sites));
-        //System.out.println("TheMap ; ");
-        //for (int i = 0; i < N; i++) {
-        //    System.out.println("\t" + Arrays.toString(theMap[i]));
-        //}
     }
 
     // open site (row i, column j) if it is not already
@@ -63,37 +57,28 @@ public class Percolation {
             // open it
             isOpens[i][j] = true;
 
-            // Check the unions -> connect with all adjacent sites
-            // not top/bottom/left/right
-            // i < N
-            // j < N
+            // Check the unions -> connect with all open adjacent sites
             if (j > 0 && j < nMinus1) {
                 unionizeBorder(i, j);
                 if (isOpen(i, j + 1)) {
-                    //System.out.println("U union (" + theMap[i][j] + ", " + theMap[i][j + 1] + ")");
                     algo.union(theMap[i][j], theMap[i][j + 1]);
                 }
                 if (isOpen(i, j - 1)) {
-                    //System.out.println("D union (" + theMap[i][j] + ", " + theMap[i][j - 1] + ")");
                     algo.union(theMap[i][j], theMap[i][j - 1]);
                 }
             } else if (j == nMinus1) {
-                //System.out.println("Connecting with top... (" + i + ", " + j + ")");
                 // Same except that we connect with TOP on j-1
                 unionizeBorder(i, j);
                 algo.union(theMap[i][j], TOP);
                 if (isOpen(i, j - 1)) {
-                    //System.out.println("D union (" + theMap[i][j] + ", " + theMap[i][j - 1] + ")");
                     algo.union(theMap[i][j], theMap[i][j - 1]);
                 }
             } else if (j == 0) {
                 // Same except that we connect with BOTTOM on j+1
                 unionizeBorder(i, j);
                 if (isOpen(i, j + 1)) {
-                    //System.out.println("U union (" + theMap[i][j] + ", " + theMap[i][j + 1] + ")");
                     algo.union(theMap[i][j], theMap[i][j + 1]);
                 }
-                //System.out.println("Connecting with bottom... (" + i + ", " + j + ")");
                 algo.union(theMap[i][j], BOTTOM);
             }
         }
@@ -119,11 +104,9 @@ public class Percolation {
 
     private void unionizeBorder(int i, int j) {
         if (i < (nMinus1) && isOpen(i + 1, j)) {
-            //System.out.println("R union (" + theMap[i][j] + ", " + theMap[i + 1][j] + ")");
             algo.union(theMap[i][j], theMap[i + 1][j]);
         }
         if (i > 0 && isOpen(i - 1, j)) {
-            //System.out.println("L union (" + theMap[i][j] + ", " + theMap[i - 1][j] + ")");
             algo.union(theMap[i][j], theMap[i - 1][j]);
         }
     }
