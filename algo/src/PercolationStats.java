@@ -113,8 +113,6 @@ public class PercolationStats {
         System.out.println("mean\t\t\t\t\t\t= " + mean);
         System.out.println("stddev\t\t\t\t\t\t= " + stddev);
         System.out.println("95% confidence interval\t\t= " + loConf + ", " + hiConf);
-
-
     }
 
 }
