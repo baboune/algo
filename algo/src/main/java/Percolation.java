@@ -16,7 +16,6 @@
  * Date: 9/3/13
  */
 
-import java.util.Arrays;
 
 /**
  * comments.
@@ -26,26 +25,25 @@ public class Percolation {
     private static final int BOTTOM = 1;
     private WeightedQuickUnionUF algo;
     private int nMinus1;
+    private int n;
 
-    private int[] sites;
     private boolean[][] isOpens;
-    private int[][] theMap;
+    private int[][] theSitesMap;
 
     // create N-by-N grid, with all sites blocked
     public Percolation(int N) {
+        n = N;
         nMinus1 = N - 1;
         // N * N plus top and bottom size
         int gridSize = N * N;
         algo = new WeightedQuickUnionUF(gridSize + 2);
         isOpens = new boolean[N][N];
-        sites = new int[gridSize];
-        theMap = new int[N][N];
+        theSitesMap = new int[N][N];
 
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 int tot = i * N + j;
-                sites[tot] = tot + 2;
-                theMap[i][j] = tot + 2;
+                theSitesMap[i][j] = tot + 2;
             }
         }
     }
@@ -54,47 +52,48 @@ public class Percolation {
     public void open(int i, int j) {
         validateIJ(i, j);
         if (!isOpen(i, j)) {
+            int li = i - 1, lj = j - 1;
             // open it
-            isOpens[i][j] = true;
+            isOpens[li][lj] = true;
 
             // Check the unions -> connect with all open adjacent sites
-            if (j > 0 && j < nMinus1) {
-                unionizeBorder(i, j);
-                if (isOpen(i, j + 1)) {
-                    algo.union(theMap[i][j], theMap[i][j + 1]);
+            if (lj > 0 && lj < nMinus1) {
+                unionizeBorder(li, lj);
+                if (isOpenWithIJ0(li, lj + 1)) {
+                    algo.union(theSitesMap[li][lj], theSitesMap[li][lj + 1]);
                 }
-                if (isOpen(i, j - 1)) {
-                    algo.union(theMap[i][j], theMap[i][j - 1]);
+                if (isOpenWithIJ0(li, lj - 1)) {
+                    algo.union(theSitesMap[li][lj], theSitesMap[li][lj - 1]);
                 }
-            } else if (j == nMinus1) {
+            } else if (lj == nMinus1) {
                 // Same except that we connect with TOP on j-1
-                unionizeBorder(i, j);
-                algo.union(theMap[i][j], TOP);
-                if (isOpen(i, j - 1)) {
-                    algo.union(theMap[i][j], theMap[i][j - 1]);
+                unionizeBorder(li, lj);
+                algo.union(theSitesMap[li][lj], TOP);
+                if (isOpenWithIJ0(li, lj - 1)) {
+                    algo.union(theSitesMap[li][lj], theSitesMap[li][lj - 1]);
                 }
-            } else if (j == 0) {
+            } else if (lj == 0) {
                 // Same except that we connect with BOTTOM on j+1
-                unionizeBorder(i, j);
-                if (isOpen(i, j + 1)) {
-                    algo.union(theMap[i][j], theMap[i][j + 1]);
+                unionizeBorder(li, lj);
+                if (isOpenWithIJ0(li, lj + 1)) {
+                    algo.union(theSitesMap[li][lj], theSitesMap[li][lj + 1]);
                 }
-                algo.union(theMap[i][j], BOTTOM);
+                algo.union(theSitesMap[li][lj], BOTTOM);
             }
         }
     }
 
     // is site (row i, column j) open?
-
     public boolean isOpen(int i, int j) {
         validateIJ(i, j);
-        return isOpens[i][j];
+        return isOpenWithIJ0(i - 1, j - 1);
     }
 
     // is site (row i, column j) full?
     public boolean isFull(int i, int j) {
         validateIJ(i, j);
-        return !isOpens[i][j];
+        int li = i - 1, lj = j - 1;
+        return !isOpens[li][lj] && algo.connected(BOTTOM, theSitesMap[li][lj]);
     }
 
     // does the system percolate?
@@ -103,36 +102,24 @@ public class Percolation {
     }
 
     private void unionizeBorder(int i, int j) {
-        if (i < (nMinus1) && isOpen(i + 1, j)) {
-            algo.union(theMap[i][j], theMap[i + 1][j]);
+        if (i < (nMinus1) && isOpenWithIJ0(i + 1, j)) {
+            algo.union(theSitesMap[i][j], theSitesMap[i + 1][j]);
         }
-        if (i > 0 && isOpen(i - 1, j)) {
-            algo.union(theMap[i][j], theMap[i - 1][j]);
+        if (i > 0 && isOpenWithIJ0(i - 1, j)) {
+            algo.union(theSitesMap[i][j], theSitesMap[i - 1][j]);
         }
+    }
+
+    private boolean isOpenWithIJ0(final int i, final int j) {
+        return isOpens[i][j];
     }
 
     private void validateIJ(final int i, int j) {
-        if (i < 0 || j < 0) {
-            throw new IllegalArgumentException("i and j must be positive integers");
+        if (i < 1 || j < 1) {
+            throw new IndexOutOfBoundsException("i and j must be positive integers");
         }
-        if (i > nMinus1 || j > nMinus1) {
-            throw new IllegalArgumentException("i and j must be less than N(" + nMinus1 + ")");
+        if (i > n || j > n) {
+            throw new IndexOutOfBoundsException("i and j must be less than " + n);
         }
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Percolation{");
-        sb.append(", sites=").append(Arrays.toString(sites));
-        sb.append(", isOpens=");
-        for (int j = 0; j <= nMinus1; j++) {
-            sb.append("\n\t [ ");
-            for(int i = 0; i <= nMinus1; i++)                                      {
-                sb.append(theMap[i][j]).append("(").append(isOpens[i][j]).append(") ");
-            }
-            sb.append("]");
-        }
-        sb.append('}');
-        return sb.toString();
     }
 }

@@ -1,4 +1,4 @@
-/**
+package w1; /**
  *
  * Copyright (c) Ericsson AB, 2013.
  *
@@ -41,8 +41,8 @@ public class PercolationStats {
             long counter = 0;
             Percolation obj = new Percolation(N);
             while (!obj.percolates()) {
-                p = rnd.nextInt(N);
-                q = rnd.nextInt(N);
+                p = rnd.nextInt(N) + 1;
+                q = rnd.nextInt(N) + 1;
                 if (!obj.isOpen(p, q)) {
                     obj.open(p, q);
                     counter++;
@@ -84,7 +84,7 @@ public class PercolationStats {
         return mean + (1.96 * stddev / Math.sqrt(nbOfExperiments));
     }
 
-    public double stddevWithMean(final double mean) {
+    private double stddevWithMean(final double mean) {
         if (nbOfExperiments == 1)
             return Double.NaN;
         double q = 0;
