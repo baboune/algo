@@ -38,6 +38,17 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <configuration>
+                    <mainClass>Brute</mainClass>
+                    <arguments>
+                        <argument>C:\projects\git\github\algo\algo\input6.txt</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
             <!--plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>

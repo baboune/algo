@@ -1,4 +1,4 @@
-package w1; /**
+/**
  *
  * Copyright (c) Ericsson AB, 2013.
  *

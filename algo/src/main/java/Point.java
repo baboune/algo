@@ -21,13 +21,14 @@ import java.util.Comparator;
 /**
  * comments.
  */
-public class Point {
+public class Point implements Comparable<Point> {
     // compare points by slope to this point
     public final Comparator<Point> SLOPE_ORDER = new SlopeOrder();
     int x, y;
 
     // construct the point (x, y)
     public Point(int x, int y) {
+        /* DO NOT MODIFY */
         this.x = x;
         this.y = y;
 
@@ -42,6 +43,7 @@ public class Point {
 
     // draw the line segment from this point to that point
     public void drawTo(Point that) {
+        /* DO NOT MODIFY */
         StdDraw.setXscale(0, 32768);
         StdDraw.setYscale(0, 32768);
         StdDraw.line(this.x, this.y, that.x, that.y);
@@ -49,13 +51,21 @@ public class Point {
 
     // string representation
     public String toString() {
+        /* DO NOT MODIFY */
         return "(" + x + ", " + y + ")";
 
     }
 
     // is this point lexicographically smaller than that point?
     public int compareTo(Point that) {
-        return -1;
+        if (this.y == that.y && this.x == that.x) {
+            return 0;
+        }
+        // y0 < y1 or if y0 = y1 and x0 < x1.
+        if((this.y < that.y) || (this.y == that.y && this.x < that.x)) {
+            return -1;
+        }
+        return 1;
     }
 
     // the slope between this point and that point
