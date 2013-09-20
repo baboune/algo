@@ -49,18 +49,20 @@
                     </arguments>
                 </configuration>
             </plugin>
-            <!--plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>
                 <version>2.5</version>
                 <configuration>
-                    <file>${basedir}/algs4/stdlib.jar</file>
+                    <!-- Change the file ND ARTIFACT IF to apply thE AUTO-install to stdlib.jar -->
+                    <!-- then mvn install:install-file -->
+                    <file>${basedir}/algs4/algs4.jar</file>
                     <groupId>coursera.cs.princeton.edu</groupId>
-                    <artifactId>stdlib</artifactId>
+                    <artifactId>algs4</artifactId>
                     <version>4.0</version>
                     <packaging>jar</packaging>
                 </configuration>
-            </plugin-->
+            </plugin>
         </plugins>
     </build>
 
