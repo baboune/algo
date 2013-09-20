@@ -62,7 +62,7 @@ public class Point implements Comparable<Point> {
             return 0;
         }
         // y0 < y1 or if y0 = y1 and x0 < x1.
-        if((this.y < that.y) || (this.y == that.y && this.x < that.x)) {
+        if ((this.y < that.y) || (this.y == that.y && this.x < that.x)) {
             return -1;
         }
         return 1;
@@ -70,14 +70,18 @@ public class Point implements Comparable<Point> {
 
     // the slope between this point and that point
     public double slopeTo(Point that) {
-        if ((this.x == that.x) && (this.y == that.y))
-            return Float.NEGATIVE_INFINITY;
-        if (that.x - this.x == 0)
-            return Float.POSITIVE_INFINITY;
-        if (that.y - this.y == 0) {
+        if (that == null) {
+            throw new NullPointerException("Null is not allowed.");
+        }
+        if (that.x == this.x) {
+            if (that.y == this.y)
+                return Double.NEGATIVE_INFINITY;
+            return Double.POSITIVE_INFINITY;
+        }
+        if (that.y == this.y) {
             return 0.0;
         }
-        return (double) (that.y - this.y) / (that.x - this.x);
+        return ((double) that.y - this.y) / (that.x - this.x);
 
     }
 

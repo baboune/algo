@@ -36,7 +36,7 @@ public class Fast {
 
         Arrays.sort(ps);
         int l = ps.length;
-        int last = ps.length -1;
+        int last = ps.length - 1;
         for (int s = 0; s < l; s++) {
             StdOut.print(ps[s]);
             if (s < last)
@@ -45,7 +45,6 @@ public class Fast {
         StdOut.println();
         ps[0].drawTo(ps[last]);
     }
-
 
     private static Point[] readInputFile(String filename) {
         In in = new In(filename);
@@ -62,10 +61,7 @@ public class Fast {
 
         Point[] points = readInputFile(args[0]);
         int n = points.length;
-        //Point lastPoint = null;
-        //System.out.println("Array: " + Arrays.toString(points));
         Arrays.sort(points);
-        //System.out.println("SortedArray: " + Arrays.toString(points) + " \n\n");
 
         for (int i = 0; i < n - MIN_POINTS; i++) {
             Point orig = points[i];
@@ -79,27 +75,35 @@ public class Fast {
             Arrays.sort(remaining, orig.SLOPE_ORDER);
             //System.out.println("SortedRemaining[" + i + "]: " + Arrays.toString(remaining));
 
-            int colinearNb = 0;
+            boolean lastElement = false;
+            int collinearCount = 0;
             double lastSlope = orig.slopeTo(remaining[0]);
+            //System.out.println("slope[" + i + "] vs orig: " + lastSlope);
 
             for (int k = 1; k < remaining.length; k++) {
                 double currentSlope = orig.slopeTo(remaining[k]);
+                lastElement = (k == remaining.length - 1);
 
-                if (currentSlope == lastSlope && !(k == remaining.length -1)) {
-                    colinearNb++;
-                    //System.out.println("Colinear: " + colinearNb);
+                if (currentSlope == lastSlope && !lastElement) {
+                    collinearCount++;
                 } else {
-                    if (colinearNb >= 2) {
-                        //System.out.println("Slope is broken or last, colinear nb: " + colinearNb);
-                        // Add origin to array
-                        Point[] toDraw = new Point[colinearNb + 1];
+                    // Check for broken slope and/or last element found
+                    if (collinearCount >= 2) {
+                        Point[] toDraw = new Point[collinearCount + 1];
                         toDraw[0] = orig;
-                        for(int c = 0; c < colinearNb; c++) {
-                            toDraw[c + 1] = remaining[k -c];
+                        if (lastElement) {
+                            for (int c = 0; c < collinearCount; c++) {
+                                toDraw[c + 1] = remaining[k - c];
+                            }
+                        } else {
+                            // Broken slope
+                            for (int c = 0; c < collinearCount; c++) {
+                                toDraw[c + 1] = remaining[(k - 1) - c];
+                            }
                         }
                         draw(toDraw);
                     }
-                    colinearNb = 0;
+                    collinearCount = 0;
                     lastSlope = currentSlope;
                 }
             }
