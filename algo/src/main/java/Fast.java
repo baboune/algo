@@ -20,12 +20,12 @@
 import java.util.Arrays;
 
 /**
- * comments.
+ * Fast version of the Brute force for finding 3 collinear points.
  */
 public class Fast {
 
     // Number of collinear points to look for.
-    private static final int MIN_POINTS = 4;
+    private static final int MIN_POINTS = 3;
 
     private static void setUpDrawing() {
         StdDraw.setXscale(0, 32768);

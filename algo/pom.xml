@@ -43,9 +43,9 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.2.1</version>
                 <configuration>
-                    <mainClass>Brute</mainClass>
+                    <mainClass>Fast</mainClass>
                     <arguments>
-                        <argument>C:\projects\git\github\algo\algo\input6.txt</argument>
+                        <argument>/local/git/github/algo/algo/input6.txt</argument>
                     </arguments>
                 </configuration>
             </plugin>
