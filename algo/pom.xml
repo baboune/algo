@@ -54,8 +54,10 @@
                 <artifactId>maven-install-plugin</artifactId>
                 <version>2.5</version>
                 <configuration>
-                    <!-- Change the file ND ARTIFACT IF to apply thE AUTO-install to stdlib.jar -->
-                    <!-- then mvn install:install-file -->
+                    <!-- Change the file and artifact id to be able to easily install stdlib.jar as well
+                         as algs4. Then
+                            mvn install:install-file
+                    -->
                     <file>${basedir}/algs4/algs4.jar</file>
                     <groupId>coursera.cs.princeton.edu</groupId>
                     <artifactId>algs4</artifactId>
