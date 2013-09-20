@@ -24,7 +24,7 @@ import java.util.Comparator;
 public class Point implements Comparable<Point> {
     // compare points by slope to this point
     public final Comparator<Point> SLOPE_ORDER = new SlopeOrder();
-    int x, y;
+    private int x, y;
 
     // construct the point (x, y)
     public Point(int x, int y) {
