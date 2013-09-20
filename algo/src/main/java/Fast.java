@@ -16,6 +16,8 @@
  * Date: 9/19/13
  */
 
+import w2.Deque;
+
 import java.util.Arrays;
 
 /**
@@ -31,17 +33,18 @@ public class Fast {
         StdDraw.setYscale(0, 32768);
     }
 
-    private static void draw(Point p1, Point p2, Point p3, Point p4) {
-        Point[] ps = new Point[]{p1, p2, p3, p4};
+    private static void draw(Point[] ps) {
 
         Arrays.sort(ps);
-        for (int s = 0; s < 4; s++) {
+        int l = ps.length;
+        int last = ps.length -1;
+        for (int s = 0; s < l; s++) {
             StdOut.print(ps[s]);
-            if (s < 3)
+            if (s < last)
                 StdOut.print(" -> ");
         }
         StdOut.println();
-        ps[0].drawTo(ps[3]);
+        ps[0].drawTo(ps[last]);
     }
 
 
@@ -72,51 +75,35 @@ public class Fast {
             for (int j = i; j < n; j++) {
                 remaining[j - i] = points[j];
             }
+
             //System.out.println("Remaining[" + i + "]: " + Arrays.toString(remaining));
             Arrays.sort(remaining, orig.SLOPE_ORDER);
             //System.out.println("SortedRemaining[" + i + "]: " + Arrays.toString(remaining));
-            int low = 0;
-            int high = 0;
+
+            int colinearNb = 0;
             double lastSlope = orig.slopeTo(remaining[0]);
 
             for (int k = 1; k < remaining.length; k++) {
                 double currentSlope = orig.slopeTo(remaining[k]);
 
-                if (currentSlope == lastSlope) {
-                    high++;
+                if (currentSlope == lastSlope && !(k == remaining.length -1)) {
+                    colinearNb++;
+                    //System.out.println("Colinear: " + colinearNb);
                 } else {
-                    int diff = high - low;
-                    if (diff >= 2) {
-                        //System.out.println("Diff: " + diff);
-                        draw(orig, remaining[high], remaining[high - 1], remaining[high - 2]);
+                    if (colinearNb >= 2) {
+                        //System.out.println("Slope is broken or last, colinear nb: " + colinearNb);
+                        // Add origin to array
+                        Point[] toDraw = new Point[colinearNb + 1];
+                        toDraw[0] = orig;
+                        for(int c = 0; c < colinearNb; c++) {
+                            toDraw[c + 1] = remaining[k -c];
+                        }
+                        draw(toDraw);
                     }
-                    low = k;
-                    high = k;
+                    colinearNb = 0;
                     lastSlope = currentSlope;
                 }
             }
-
-            /*if (high - low >= 2 && remaining[high] != lastPoint) {
-                lastPoint = remaining[high];
-                draw(orig, remaining[high], remaining[high - 1], remaining[high - 2]);
-            } */
-             /*do {
-                // Invariant: We're looking at the subarray that begins right
-                // after the last run.
-                next = points[i].slopeTo(scratch[stop]);
-                // Gallop the stop pointer ri)ghtward to look for a run.
-                do {
-                    stop += 1;
-                    last = next;
-                    next = points[i].slopeTo(scratch[stop]);
-                } while (stop < n - i - 1 && last != next);
-                start = stop - 1;
-                while (stop < n - i && last == points[i].slopeTo(scratch[stop]))
-                    stop++;
-                //if (stop - start + 1 >= MIN_POINTS) // Add one for points[i].
-                //    draw(points[i], scratch, start, stop);
-            } while (stop < n - i - 1);
-            */
         }
     }
 }
