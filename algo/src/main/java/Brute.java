@@ -23,21 +23,23 @@ import java.util.Arrays;
  */
 public class Brute {
 
+    public static final int MAX_OFFSET = 32768;
+
     private static void setUpDrawing() {
-        StdDraw.setXscale(0, 32768);
-        StdDraw.setYscale(0, 32768);
+        StdDraw.setXscale(0, MAX_OFFSET);
+        StdDraw.setYscale(0, MAX_OFFSET);
     }
 
-        private static boolean collinear(Point[] p) {
-        if(p.length != 4){
+    private static boolean collinear(final Point[] p) {
+        if (p.length != 4) {
             throw new UnsupportedOperationException("4 points only");
         }
         double s1 = p[0].slopeTo(p[1]);
-        return (s1 == p[0].slopeTo(p[2]) &&
-                s1 == p[0].slopeTo(p[3]));
+        return (s1 == p[0].slopeTo(p[2])
+                && s1 == p[0].slopeTo(p[3]));
     }
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         setUpDrawing();
 
         int i, j, k, l;
