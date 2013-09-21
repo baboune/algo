@@ -21,6 +21,14 @@ import java.util.Arrays;
 
 /**
  * Fast version of the Brute force for finding 3 collinear points.
+ *
+ * Permutations are excluded ie it does not print permutations of points on a line segment (e.g., p→q→r→s,
+ * it does not also output either s→r→q→p or p→r→q→s).
+ *
+ * The solution is not good enough to eliminate all extra sub-segments but it seems to work..
+ * I.e. subsegments of a line segment containing 5 or more points (e.g., if you output p→q→r→s→t,
+ * it will also output either p→q→r, and p→q→r→s.
+ *
  */
 public class Fast {
 
@@ -105,7 +113,7 @@ public class Fast {
                         Point[] toDraw = new Point[nbFoundPoints + ADD_ORIG];
                         int pos = 0;
                         toDraw[pos++] = orig;
-                        if (lastElement) {
+                        if (lastElement && currentSlope == lastSlope) {
                             // Include current
                             for (int c = segmentCount; c >= 0; c--) {
                                 toDraw[pos++] = remaining[k - c];
