@@ -23,7 +23,7 @@ import java.util.Arrays;
  */
 public class Brute {
 
-    public static final int MAX_OFFSET = 32768;
+    private static final int MAX_OFFSET = 32768;
 
     private static void setUpDrawing() {
         StdDraw.setXscale(0, MAX_OFFSET);

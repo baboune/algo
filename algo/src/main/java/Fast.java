@@ -25,11 +25,12 @@ import java.util.Arrays;
 public class Fast {
 
     // Number of collinear points to look for.
-    private static final int MIN_POINTS = 3;
+    private static final int MAX_OFFSET = 32768;
+    private static final int ADD_ORIG = 1;
 
     private static void setUpDrawing() {
-        StdDraw.setXscale(0, 32768);
-        StdDraw.setYscale(0, 32768);
+        StdDraw.setXscale(0, MAX_OFFSET);
+        StdDraw.setYscale(0, MAX_OFFSET);
     }
 
     private static void draw(Point[] ps) {
@@ -46,7 +47,7 @@ public class Fast {
         ps[0].drawTo(ps[last]);
     }
 
-    private static Point[] readInputFile(String filename) {
+    private static Point[] readInputFile(final String filename) {
         In in = new In(filename);
         int n = in.readInt();
         Point[] points = new Point[n];
@@ -56,56 +57,72 @@ public class Fast {
         return points;
     }
 
-    public static void main(String[] args) {
+    /**
+     * Main start.
+     * @param args
+     */
+    public static void main(final String[] args) {
         setUpDrawing();
 
         Point[] points = readInputFile(args[0]);
         int n = points.length;
         Arrays.sort(points);
+        for (Point p : points) {
+            p.draw();
+        }
 
-        for (int i = 0; i < n - MIN_POINTS; i++) {
+        for (int i = 0; i < (n - 2); i++) {
             Point orig = points[i];
+            //System.out.println("[" + i + "] Orig: " + orig.toString());
 
-            Point[] remaining = new Point[n - i];
-            for (int j = i; j < n; j++) {
-                remaining[j - i] = points[j];
+            int next = i + 1;
+            Point[] remaining = new Point[n - next];
+            for (int j = next; j < n; j++) {
+                remaining[j - next] = points[j];
             }
 
-            //System.out.println("Remaining[" + i + "]: " + Arrays.toString(remaining));
+            // Sort by slope
             Arrays.sort(remaining, orig.SLOPE_ORDER);
-            //System.out.println("SortedRemaining[" + i + "]: " + Arrays.toString(remaining));
+            //System.out.println("["+ i + "] Ordered by slope: " + Arrays.toString(remaining));
 
             boolean lastElement = false;
-            int collinearCount = 0;
+            int segmentCount = 0;
             double lastSlope = orig.slopeTo(remaining[0]);
-            //System.out.println("slope[" + i + "] vs orig: " + lastSlope);
 
             for (int k = 1; k < remaining.length; k++) {
-                double currentSlope = orig.slopeTo(remaining[k]);
+                Point currPoint = remaining[k];
+                double currentSlope = orig.slopeTo(currPoint);
                 lastElement = (k == remaining.length - 1);
 
-                if (currentSlope == lastSlope && !lastElement) {
-                    collinearCount++;
-                } else {
+                if (currentSlope == lastSlope) {
+                    segmentCount++;
+                }
+                if (currentSlope != lastSlope || lastElement) {
                     // Check for broken slope and/or last element found
-                    if (collinearCount >= 2) {
-                        Point[] toDraw = new Point[collinearCount + 1];
-                        toDraw[0] = orig;
+                    if (segmentCount >= 2) {
+                        // Each segment -> 2 points -> 2 segements => 3 pts
+                        int nbFoundPoints = segmentCount + 1;
+                        Point[] toDraw = new Point[nbFoundPoints + ADD_ORIG];
+                        int pos = 0;
+                        toDraw[pos++] = orig;
                         if (lastElement) {
-                            for (int c = 0; c < collinearCount; c++) {
-                                toDraw[c + 1] = remaining[k - c];
+                            // Include current
+                            for (int c = segmentCount; c >= 0; c--) {
+                                toDraw[pos++] = remaining[k - c];
                             }
                         } else {
-                            // Broken slope
-                            for (int c = 0; c < collinearCount; c++) {
-                                toDraw[c + 1] = remaining[(k - 1) - c];
+                            // Broken slope -> Ignore current
+                            for (int c = segmentCount + 1; c > 0; c--) {
+                                toDraw[pos++] = remaining[k - c];
                             }
                         }
                         draw(toDraw);
                     }
-                    collinearCount = 0;
+                    segmentCount = 0;
                     lastSlope = currentSlope;
                 }
+
+
             }
         }
     }
