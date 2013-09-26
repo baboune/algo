@@ -16,6 +16,8 @@
  * Date: 9/19/13
  */
 
+import w3.Point;
+
 import java.util.Arrays;
 
 /**

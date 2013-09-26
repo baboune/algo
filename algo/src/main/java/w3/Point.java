@@ -1,4 +1,4 @@
-/**
+package w3; /**
  *
  * Copyright (c) Baboune AB, 2013.
  *

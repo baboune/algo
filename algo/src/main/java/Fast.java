@@ -17,6 +17,8 @@
  */
 
 
+import w3.Point;
+
 import java.util.Arrays;
 
 /**

@@ -17,8 +17,8 @@
  */
 
 
-
 import org.junit.Test;
+import w3.Point;
 
 import java.util.Arrays;
 
