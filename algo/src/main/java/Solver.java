@@ -67,7 +67,10 @@ public class Solver {
                     pq.insert(new SearchNode(neighbor, smallest.moves + 1, smallest));
                 }
             }
-            if (smallest.moves > (length * length * length)) {
+            if (smallest.moves / length == 0) {
+                System.out.println("At: " + smallest.moves);
+            }
+            if (pq.isEmpty() || smallest.moves > (length * length * length)) {
                 //System.out.println("No solution found..");
                 return null;
             }

@@ -67,9 +67,9 @@ public class Board {
                     // skip
                     continue;
                 }
-                int exp_i = ((elem - 1) / n);
-                int exp_j = (elem - 1) % n;
-                sum += Math.abs(i - exp_i) + Math.abs(j - exp_j);
+                int iExpected = ((elem - 1) / n);
+                int jExpected = (elem - 1) % n;
+                sum += Math.abs(i - iExpected) + Math.abs(j - jExpected);
             }
         }
         return sum;
@@ -104,8 +104,12 @@ public class Board {
         if (zeroRow == -1) {
             throw new UnsupportedOperationException("Expected to find a 0.");
         }
+        int rowToUse = 0;
+        // Avoid it if this row contains a 0
+        if (zeroRow == 0) {
+            rowToUse = 1;
+        }
         // swap [row][0] with [row][1]
-        int rowToUse = zeroRow == 0 ? 1 : 0;
         return new Board(swap(rowToUse, 0, rowToUse, 1));
     }
 
