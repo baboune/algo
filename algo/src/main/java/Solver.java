@@ -50,6 +50,7 @@ public class Solver {
 
     private SearchNode solve(Board initial) {
         MinPQ<SearchNode> pq = new MinPQ<SearchNode>();
+        int length = initial.dimension();
 
         pq.insert(new SearchNode(initial, 0, null));
         SearchNode smallest = null;
@@ -66,6 +67,10 @@ public class Solver {
                     pq.insert(new SearchNode(neighbor, smallest.moves + 1, smallest));
                 }
             }
+            if (smallest.moves > (length * length * length)) {
+                //System.out.println("No solution found..");
+                return null;
+            }
         }
         return smallest;
     }
@@ -73,7 +78,9 @@ public class Solver {
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
         result = solve(initial);
-        // result2 = solve(initial.twin());
+        if (result == null) {
+            result2 = solve(initial.twin());
+        }
     }
 
     // is the initial board solvable?
