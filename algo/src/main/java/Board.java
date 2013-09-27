@@ -16,14 +16,15 @@
  * Date: 9/26/13
  */
 
+
 /**
- * comments.
+ * A square board of N x N elements.
  */
 public class Board {
 
+    private static final int UNDEF = -1;
     private final int[][] blocks;
     private final int n;
-    private int total;
 
     // construct a board from an N-by-N array of blocks
     // (where blocks[i][j] = block in row i, column j)
@@ -32,23 +33,10 @@ public class Board {
             throw new NullPointerException();
         }
         n = blocks.length;
-        this.blocks = new int[n][n];
-        System.arraycopy(blocks, 0, this.blocks, 0, n);
-        total = n * n;
+        this.blocks = copySquareArray(blocks);
+
     }
 
-
-    // Copy a square array.
-    private int[][] copySquareArray(int[][] original) {
-        int len = original.length;
-        int[][] copy = new int[len][len];
-        for (int row = 0; row < len; row++) {
-            assert original[row].length == len;
-            for (int col = 0; col < len; col++)
-                copy[row][col] = (short) original[row][col];
-        }
-        return copy;
-    }
 
     // board dimension N
     public int dimension() {
@@ -58,6 +46,7 @@ public class Board {
     // number of blocks out of place
     public int hamming() {
         int count = 0;
+        int total = n * n;
         for (int i = 0; i < total; i++) {
             if (blocks[i / n][i % n] != (i + 1)) {
                 count++;
@@ -92,6 +81,7 @@ public class Board {
         if (blocks[n - 1][n - 1] != 0)
             return false;
         // Remove 0
+        int total = n * n;
         int max = (total - 1);
         for (int i = 0; i < max; i++) {
             if (blocks[i / n][i % n] != (i + 1)) {
@@ -103,12 +93,60 @@ public class Board {
 
     // a board obtained by exchanging two adjacent blocks in the same row
     public Board twin() {
-        return null;
+        int zeroRow = UNDEF;
+        for (int j = 0; j < n && zeroRow == -1; j++)
+            // Look if 0 is on first row
+            for (int i = 0; (i < n) && zeroRow == -1; i++) {
+                if (blocks[j][i] == 0) {
+                    zeroRow = j;
+                }
+            }
+        if (zeroRow == -1) {
+            throw new UnsupportedOperationException("Expected to find a 0.");
+        }
+        // swap [row][0] with [row][1]
+        int rowToUse = zeroRow == 0 ? 1 : 0;
+        return new Board(swap(rowToUse, 0, rowToUse, 1));
     }
 
     // all neighboring boards
     public Iterable<Board> neighbors() {
-        return null;
+        // This is obtained by sliding the 0...
+        Queue<Board> q = new Queue<Board>();
+        int iZero = -1, jZero = -1;
+        for (int i = 0; i < n && (iZero == -1); i++) {
+            for (int j = 0; j < n; j++) {
+                if (blocks[i][j] == 0) {
+                    iZero = i;
+                    jZero = j;
+                    break;
+                }
+            }
+        }
+        if (iZero == -1 || jZero == -1) {
+            return q;
+        }
+        if (jZero > 0) {
+            //neighbor to left allowed
+            Board b = new Board(swap(iZero, jZero, iZero, jZero - 1));
+            q.enqueue(b);
+        }
+        if (jZero < n - 1) {
+            //neighbor to right allowed
+            Board b = new Board(swap(iZero, jZero, iZero, jZero + 1));
+            q.enqueue(b);
+        }
+        if (iZero > 0) {
+            // Up neighbor
+            Board b = new Board(swap(iZero, jZero, iZero - 1, jZero));
+            q.enqueue(b);
+        }
+        if (iZero < n - 1) {
+            // Down neighbor
+            Board b = new Board(swap(iZero, jZero, iZero + 1, jZero));
+            q.enqueue(b);
+        }
+        return q;
     }
 
     // string representation of the board (in the output format specified below)
@@ -122,6 +160,53 @@ public class Board {
             s.append("\n");
         }
         return s.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Board that = (Board) o;
+
+        if (n != that.n) return false;
+        // compare arrays
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (blocks[i][j] != that.blocks[i][j]) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private int[][] swap(int i, int j, int toi, int toj) {
+        int[][] copy = copySquareArray(blocks);
+        int tmp = copy[toi][toj];
+        copy[toi][toj] = copy[i][j];
+        copy[i][j] = tmp;
+        return copy;
+    }
+
+    private String printBlocks(int[][] what) {
+        StringBuilder s = new StringBuilder(100);
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                s.append(String.format("%2d ", what[i][j]));
+            }
+            s.append("\n");
+        }
+        return s.toString();
+    }
+
+    private int[][] copySquareArray(int[][] what) {
+        int l = what.length;
+        int[][] copy = new int[l][l];
+        for (int i = 0; i < l; i++) {
+            System.arraycopy(what[i], 0, copy[i], 0, l);
+        }
+        return copy;
     }
 
 }
