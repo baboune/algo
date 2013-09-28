@@ -18,72 +18,15 @@
 
 
 /**
- * comments.
+ * Works well.. got 100%.
  */
 public class Solver {
 
     private SearchNode result;
-    private SearchNode result2;
-
-    private class SearchNode implements Comparable<SearchNode> {
-        private final Board board;
-        private final int moves;
-        private final SearchNode previous;
-        private final int priority;
-
-        private SearchNode(Board board, int moves, SearchNode previous) {
-            this.board = board;
-            this.previous = previous;
-            this.moves = moves;
-            this.priority = board.manhattan() + moves;
-            //this.priority = this.board.hamming() + moves;
-            // Property of A* algorithm.
-            assert this.previous == null || priority >= this.previous.priority;
-        }
-
-        @Override
-        public int compareTo(SearchNode that) {
-            return (priority) - (that.priority);
-        }
-    }
-
-
-    private SearchNode solve(Board initial) {
-        MinPQ<SearchNode> pq = new MinPQ<SearchNode>();
-        int length = initial.dimension();
-
-        pq.insert(new SearchNode(initial, 0, null));
-        SearchNode smallest = null;
-        while (true) {
-            smallest = pq.delMin();
-            if (smallest.board.isGoal()) {
-                //System.out.println("Got a solution!!!");
-                break;
-            }
-            Iterable<Board> neighbors = smallest.board.neighbors();
-            for (Board neighbor : neighbors) {
-                // Dont enqueue a board that has already been evaluated
-                if (smallest.previous == null || !neighbor.equals(smallest.previous.board)) {
-                    pq.insert(new SearchNode(neighbor, smallest.moves + 1, smallest));
-                }
-            }
-            if (smallest.moves / length == 0) {
-                System.out.println("At: " + smallest.moves);
-            }
-            if (pq.isEmpty() || smallest.moves > (length * length * length)) {
-                //System.out.println("No solution found..");
-                return null;
-            }
-        }
-        return smallest;
-    }
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
-        result = solve(initial);
-        if (result == null) {
-            result2 = solve(initial.twin());
-        }
+        result = solve(initial, initial.twin());
     }
 
     // is the initial board solvable?
@@ -111,6 +54,65 @@ public class Solver {
         return s;
     }
 
+    private class SearchNode implements Comparable<SearchNode> {
+        private final Board board;
+        private final int moves;
+        private final SearchNode previous;
+        private final int priority;
+
+        private SearchNode(Board board, int moves, SearchNode previous) {
+            this.board = board;
+            this.previous = previous;
+            this.moves = moves;
+            this.priority = board.manhattan() + moves;
+            //this.priority = this.board.hamming() + moves;
+            // Property of A* algorithm.
+            assert this.previous == null || priority >= this.previous.priority;
+        }
+
+        @Override
+        public int compareTo(SearchNode that) {
+            return (priority) - (that.priority);
+        }
+    }
+
+    // If twin wins the race then there is no solution...
+    private SearchNode solve(Board initial, Board twin) {
+        MinPQ<SearchNode> mainpq = new MinPQ<SearchNode>();
+        MinPQ<SearchNode> twinpq = new MinPQ<SearchNode>();
+        mainpq.insert(new SearchNode(initial, 0, null));
+        twinpq.insert(new SearchNode(twin, 0, null));
+
+        boolean isTwin = false;
+        MinPQ<SearchNode> currentPq = null;
+        SearchNode smallest = null;
+        while (true) {
+            // One iter each
+            if (isTwin) {
+                currentPq = twinpq;
+            } else {
+                currentPq = mainpq;
+            }
+            smallest = currentPq.delMin();
+            if (smallest.board.isGoal()) {
+                //System.out.println("Got a solution!!!");
+                if (isTwin) {
+                    // twin won
+                    return null;
+                }
+                break;
+            }
+            isTwin = !isTwin;
+            Iterable<Board> neighbors = smallest.board.neighbors();
+            for (Board neighbor : neighbors) {
+                // Dont enqueue a board that has already been evaluated
+                if (smallest.previous == null || !neighbor.equals(smallest.previous.board)) {
+                    currentPq.insert(new SearchNode(neighbor, smallest.moves + 1, smallest));
+                }
+            }
+        }
+        return smallest;
+    }
 
     public static void main(String[] args) {
         // create initial board from file
