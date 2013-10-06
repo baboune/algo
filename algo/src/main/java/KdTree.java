@@ -20,8 +20,8 @@
  * comments.
  */
 public class KdTree {
-    static final int VERTICAL = 1;
-    static final int HORIZONTAL = 2;
+    private static final int VERTICAL = 1;
+    private static final int HORIZONTAL = 2;
     private Node root;
     private Point2D minPoint;
     private double minDist;
