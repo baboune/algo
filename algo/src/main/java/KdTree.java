@@ -23,10 +23,10 @@ public class KdTree {
     static final int VERTICAL = 1;
     static final int HORIZONTAL = 2;
     private Node root;
+    private Point2D minPoint;
+    private double minDist;
 
-    static class Node {
-
-
+    private static class Node {
         private Point2D value;
         private Node left, right;
         private int n;
@@ -94,7 +94,7 @@ public class KdTree {
                 //Is it left or right?
                 if (value.x() > p.x()) {
                     xmax = this.value.x();
-                } else {
+                } else if (value.x() < p.x()) {
                     xmin = this.value.x();
                 }
             } else {
@@ -102,7 +102,7 @@ public class KdTree {
                 // Is it above or less?
                 if (value.y() > p.y()) {
                     ymax = this.value.y();
-                } else {
+                } else if (value.y() < p.y()) {
                     ymin = this.value.y();
                 }
             }
@@ -151,18 +151,37 @@ public class KdTree {
         StdDraw.line(1, 1, 0, 1);
         StdDraw.line(0, 1, 0, 0);
 
-        draw(root, null);
-
+        draw(root);
     }
 
     // all points in the set that are inside the rectangle
     public Iterable<Point2D> range(RectHV rect) {
-        return null;
+        // Range search. To find all points contained in a given query rectangle, start at the root and
+        // recursively search for points in both subtrees using the following pruning rule:
+        // if the query rectangle does not intersect the rectangle corresponding to a node, there is no need to
+        // explore that node (or its subtrees). A subtree is searched only if it might contain a point contained in
+        // the query rectangle.
+        Stack<Point2D> stack = new Stack<Point2D>();
+        range(root, rect, stack);
+        return stack;
     }
 
     // a nearest neighbor in the set to p; null if set is empty
     public Point2D nearest(Point2D p) {
-        return null;
+        // Nearest neighbor search. To find a closest point to a given query point, start at the root and
+        // recursively search in both subtrees using the following pruning rule: if the closest point discovered
+        // so far is closer than the distance between the query point and the rectangle corresponding to a node,
+        // there is no need to explore that node (or its subtrees). That is, a node is searched only if it might
+        // contain a point that is closer than the best one found so far. The effectiveness of the pruning rule
+        // depends on quickly finding a nearby point. To do this, organize your recursive method so that when
+        // there are two possible subtrees to go down, you always choose the subtree that is on the same side of
+        // the splitting line as the query point as the first subtree to explore—the closest point found while
+        // exploring the first subtree may enable pruning of the second subtree.
+        minPoint = root.value;
+        minDist = minPoint.distanceSquaredTo(p);
+
+        searchNearest(root, p);
+        return minPoint;
     }
 
     private int size(Node node) {
@@ -178,7 +197,6 @@ public class KdTree {
                 return new Node(point, 1, VERTICAL, new RectHV(0d, 0d, 1d, 1d));
             } else {
                 RectHV r = parent.getChildRect(point);
-                System.out.println("Rect: " + r);
                 return new Node(point, 1, opposite(parent.type), r);
             }
 
@@ -218,7 +236,7 @@ public class KdTree {
         return node.value;
     }
 
-    private void draw(Node node, Node parent) {
+    private void draw(Node node) {
         if (node == null) {
             return;
         }
@@ -228,16 +246,16 @@ public class KdTree {
 
         double x = node.value.x();
         double y = node.value.y();
-
+        //StdDraw.point(x, y);
         if (node.type == HORIZONTAL) {
-            StdDraw.setPenColor(StdDraw.RED);
-            StdDraw.line(x, node.rect.ymin(), x, node.rect.ymax());
-        } else {
             StdDraw.setPenColor(StdDraw.BLUE);
             StdDraw.line(node.rect.xmin(), y, node.rect.xmax(), y);
+        } else {
+            StdDraw.setPenColor(StdDraw.RED);
+            StdDraw.line(x, node.rect.ymin(), x, node.rect.ymax());
         }
-        draw(node.left, node);
-        draw(node.right, node);
+        draw(node.left);
+        draw(node.right);
     }
 
     private int opposite(int type) {
@@ -245,6 +263,72 @@ public class KdTree {
             return HORIZONTAL;
         }
         return VERTICAL;
+    }
+
+    private void range(Node node, RectHV rect, Stack<Point2D> stack) {
+        if (node == null) {
+            return;
+        }
+
+        if (node.compareTo(rect) > 0) {
+            range(node.left, rect, stack);
+        } else if (node.compareTo(rect) < 0) {
+            range(node.right, rect, stack);
+        } else {
+            // both
+            if (rect.contains(node.value)) {
+                stack.push(node.value);
+            }
+            range(node.left, rect, stack);
+            range(node.right, rect, stack);
+        }
+    }
+
+    private void searchNearest(Node node, Point2D p) {
+        double dist = node.value.distanceSquaredTo(p);
+
+        if (minDist > dist) {
+            minPoint = node.value;
+            minDist = dist;
+        }
+
+        if (node.left != null && node.right != null) {
+            double left, right;
+
+            left = node.left.rect.distanceSquaredTo(p);
+            right = node.right.rect.distanceSquaredTo(p);
+
+            if (left < right) {
+                searchNearest(node.left, p);
+
+                if (right < minDist) {
+                    searchNearest(node.right, p);
+                }
+
+            } else {
+                searchNearest(node.right, p);
+
+                if (left < minDist) {
+                    searchNearest(node.left, p);
+                }
+            }
+
+            return;
+        }
+
+        if (node.left != null) {
+            if (node.left.rect.distanceSquaredTo(p) < minDist) {
+                searchNearest(node.left, p);
+            }
+        }
+
+        if (node.right != null) {
+            if (node.right.rect.distanceSquaredTo(p) < minDist) {
+                searchNearest(node.right, p);
+            }
+        }
+
+        return;
     }
 
     public static void main(String[] args) {
