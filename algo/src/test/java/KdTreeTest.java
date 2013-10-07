@@ -28,6 +28,9 @@ import static org.junit.Assert.assertTrue;
  * comments.
  */
 public class KdTreeTest {
+    private static final int HORIZONTAL = 2;
+    private static final int VERTICAL = 2;
+
     Point2D p1 = new Point2D(0.7, 0.1);
     Point2D p2 = new Point2D(0.5, 0.4);
     Point2D p3 = new Point2D(0.9, 0.6);
@@ -55,7 +58,7 @@ public class KdTreeTest {
     @Test
     public void testNodeGetRect() {
         Point2D p1 = new Point2D(0.7, 0.1);
-        KdTree.Node parent = new KdTree.Node(p1, 1, KdTree.VERTICAL, new RectHV(0, 0, 1, 1));
+        KdTree.Node parent = new KdTree.Node(p1, 1, VERTICAL, new RectHV(0, 0, 1, 1));
         Point2D p2 = new Point2D(0.5, 0.4);
         RectHV r = parent.getChildRect(p2);
         assertTrue(1.0 - r.ymax() < 0.0001);
@@ -69,7 +72,7 @@ public class KdTreeTest {
         assertTrue(1.0 - r.xmax() < 0.0001);
         assertTrue(0.7 - r.xmin() < 0.0001);
 
-        parent = new KdTree.Node(p2, 1, KdTree.HORIZONTAL, new RectHV(0, 0, 0.7, 1));
+        parent = new KdTree.Node(p2, 1, HORIZONTAL, new RectHV(0, 0, 0.7, 1));
         r = parent.getChildRect(p4);
         assertTrue(0.4 - r.ymax() < 0.0001);
         assertTrue(0.0 - r.ymin() < 0.0001);
@@ -152,7 +155,42 @@ public class KdTreeTest {
         assertEquals(3, count);
         assertTrue(foundP1 && foundP2 && foundP5);
         assertFalse(foundP3 && foundP4);
+    }
 
+    @Test
+    public void testCircle10() {
+        final Point2D p1 = new Point2D(0.206107, 0.095492);
+        final Point2D p2 = new Point2D(0.975528, 0.654508);
+        final Point2D p3 = new Point2D(0.024472, 0.345492);
+        final Point2D p4 = new Point2D(0.793893, 0.095492);
+        final Point2D p5 = new Point2D(0.793893, 0.904508);
+        final Point2D p6 = new Point2D(0.975528, 0.345492);
+        final Point2D p7 = new Point2D(0.206107, 0.904508);
+        final Point2D p8 = new Point2D(0.500000, 0.000000);
+        final Point2D p9 = new Point2D(0.024472, 0.654508);
+        final Point2D p10 = new Point2D(0.500000, 1.000000);
 
+        KdTree tree = new KdTree();
+        tree.insert(p1);
+        assertEquals(1, tree.size());
+        tree.insert(p2);
+        assertEquals(2, tree.size());
+        tree.insert(p3);
+        assertEquals(3, tree.size());
+        tree.insert(p4);
+        assertEquals(4, tree.size());
+        tree.insert(p5);
+        assertEquals(5, tree.size());
+        tree.insert(p6);
+        assertEquals(6, tree.size());
+        tree.insert(p7);
+        assertEquals(7, tree.size());
+        tree.insert(p8);
+        assertEquals(8, tree.size());
+        tree.insert(p9);
+        assertEquals(9, tree.size());
+        tree.insert(p10);
+
+        assertEquals(10, tree.size());
     }
 }

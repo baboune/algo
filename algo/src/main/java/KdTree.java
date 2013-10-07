@@ -26,7 +26,7 @@ public class KdTree {
     private Point2D minPoint;
     private double minDist;
 
-    private static class Node {
+    static class Node {
         private Point2D value;
         private Node left, right;
         private int n;
@@ -212,7 +212,14 @@ public class KdTree {
         } else if (pointValue > nodeValue) {
             node.right = put(node.right, point, node);
         } else {
-            node.value = point;
+            if (node.value.equals(point)) {
+                // Found exact match -> replace
+                node.value = point;
+            } else {
+                // Put to the right.
+                node.right = put(node.right, point, node);
+            }
+
         }
         node.n = size(node.left) + size(node.right) + 1;
         return node;
