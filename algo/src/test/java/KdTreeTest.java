@@ -22,6 +22,7 @@ import java.util.Iterator;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -197,5 +198,15 @@ public class KdTreeTest {
         Point2D test = new Point2D(0.81, 0.30);
         Point2D nearest = tree.nearest(test);
         assertEquals(p6, nearest);
+
+        Iterable<Point2D> iters = tree.range(new RectHV(0.0, 0.0, 0.81, 0.3));
+        Iterator<Point2D> it = iters.iterator();
+        int count = 0;
+        while (it.hasNext()) {
+            Point2D p = it.next();
+            assertNotNull(p);
+            count++;
+        }
+        assertEquals(3, count);
     }
 }
