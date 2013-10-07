@@ -192,5 +192,10 @@ public class KdTreeTest {
         tree.insert(p10);
 
         assertEquals(10, tree.size());
+
+        //  nearest() is called with p = (.81, .30) -> 5
+        Point2D test = new Point2D(0.81, 0.30);
+        Point2D nearest = tree.nearest(test);
+        assertEquals(p6, nearest);
     }
 }
