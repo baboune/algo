@@ -17,7 +17,7 @@
  */
 
 /**
- * comments.
+ * Almost 100%.. some problems with Range...
  */
 public class KdTree {
     private static final int VERTICAL = 1;
@@ -38,50 +38,6 @@ public class KdTree {
             this.n = n;
             this.type = type;
             this.rect = rectHV;
-        }
-
-        public int compareTo(Point2D point) {
-            double thisVal = value.y();
-            double thatVal = point.y();
-            if (this.type == VERTICAL) {
-                thisVal = value.x();
-                thatVal = point.x();
-            }
-
-            if (thisVal < thatVal) {
-                return -1;
-            } else if (thisVal > thatVal) {
-                return 1;
-            }
-            return 0;
-        }
-
-        public int compareTo(RectHV r) {
-            double x = value.x();
-            double y = value.y();
-
-            if (this.type == HORIZONTAL) {
-                if (x > r.xmax()) {
-                    // left
-                    return 1;
-                }
-                if (x < r.xmin()) {
-                    // right
-                    return -1;
-                }
-            } else {
-                if (y > r.ymax()) {
-                    // bottom
-                    return 1;
-                }
-                if (y < r.ymin()) {
-                    // top
-                    return -1;
-                }
-            }
-
-            // intersect
-            return 0;
         }
 
         public RectHV getChildRect(Point2D p) {
@@ -156,14 +112,12 @@ public class KdTree {
 
     // all points in the set that are inside the rectangle
     public Iterable<Point2D> range(RectHV rect) {
-        // Range search. To find all points contained in a given query rectangle, start at the root and
-        // recursively search for points in both subtrees using the following pruning rule:
-        // if the query rectangle does not intersect the rectangle corresponding to a node, there is no need to
-        // explore that node (or its subtrees). A subtree is searched only if it might contain a point contained in
-        // the query rectangle.
-        Stack<Point2D> stack = new Stack<Point2D>();
-        range(root, rect, stack);
-        return stack;
+        Queue<Point2D> queue = new Queue<Point2D>();
+        if (rect == null) {
+            return queue;
+        }
+        range(root, rect, queue);
+        return queue;
     }
 
     // a nearest neighbor in the set to p; null if set is empty
@@ -177,6 +131,9 @@ public class KdTree {
         // there are two possible subtrees to go down, you always choose the subtree that is on the same side of
         // the splitting line as the query point as the first subtree to explore—the closest point found while
         // exploring the first subtree may enable pruning of the second subtree.
+        if (root == null) {
+            return null;
+        }
         minPoint = root.value;
         minDist = minPoint.distanceSquaredTo(p);
 
@@ -239,8 +196,16 @@ public class KdTree {
             return get(node.left, point);
         } else if (pointValue > nodeValue) {
             return get(node.right, point);
+        } else {
+            // possible equality
+            if (node.value.equals(point)) {
+                // Found exact match -> return
+                return node.value;
+            } else {
+                // Put to the right.
+                return get(node.right, point);
+            }
         }
-        return node.value;
     }
 
     private void draw(Node node) {
@@ -272,24 +237,31 @@ public class KdTree {
         return VERTICAL;
     }
 
-    private void range(Node node, RectHV rect, Stack<Point2D> stack) {
+    private void range(Node node, RectHV queryRect, Queue<Point2D> queue) {
         if (node == null) {
             return;
         }
-
-        if (node.compareTo(rect) > 0) {
-            range(node.left, rect, stack);
-        } else if (node.compareTo(rect) < 0) {
-            range(node.right, rect, stack);
-        } else {
-            // both
-            if (rect.contains(node.value)) {
-                stack.push(node.value);
-            }
-            range(node.left, rect, stack);
-            range(node.right, rect, stack);
+        double hi = queryRect.xmax();
+        double lo = queryRect.xmin();
+        double value = node.value.x();
+        if (node.type == HORIZONTAL) {
+            hi = queryRect.ymax();
+            lo = queryRect.ymin();
+            value = node.value.y();
+        }
+        int cmplo = Double.compare(lo, value);
+        int cmphi = Double.compare(hi, value);
+        if (cmplo < 0) {
+            range(node.left, queryRect, queue);
+        }
+        if (cmplo <= 0 && cmphi >= 0) {
+            queue.enqueue(node.value);
+        }
+        if (cmphi > 0) {
+            range(node.right, queryRect, queue);
         }
     }
+
 
     private void searchNearest(Node node, Point2D p) {
         double dist = node.value.distanceSquaredTo(p);
@@ -307,19 +279,15 @@ public class KdTree {
 
             if (left < right) {
                 searchNearest(node.left, p);
-
                 if (right < minDist) {
                     searchNearest(node.right, p);
                 }
-
             } else {
                 searchNearest(node.right, p);
-
                 if (left < minDist) {
                     searchNearest(node.left, p);
                 }
             }
-
             return;
         }
 
@@ -334,8 +302,6 @@ public class KdTree {
                 searchNearest(node.right, p);
             }
         }
-
-        return;
     }
 
     public static void main(String[] args) {

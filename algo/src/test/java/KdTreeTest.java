@@ -199,6 +199,11 @@ public class KdTreeTest {
         Point2D nearest = tree.nearest(test);
         assertEquals(p6, nearest);
 
+        // testing nearest() with (0.206107, 0.095492)
+        test = new Point2D(0.206107, 0.095492);
+        nearest = tree.nearest(test);
+        assertEquals(p1, nearest);
+
         Iterable<Point2D> iters = tree.range(new RectHV(0.0, 0.0, 0.81, 0.3));
         Iterator<Point2D> it = iters.iterator();
         int count = 0;
