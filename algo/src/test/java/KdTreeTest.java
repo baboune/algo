@@ -28,8 +28,8 @@ import static org.junit.Assert.assertTrue;
  * comments.
  */
 public class KdTreeTest {
+    private static final int VERTICAL = 1;
     private static final int HORIZONTAL = 2;
-    private static final int VERTICAL = 2;
 
     Point2D p1 = new Point2D(0.7, 0.1);
     Point2D p2 = new Point2D(0.5, 0.4);
