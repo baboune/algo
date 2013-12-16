@@ -22,8 +22,8 @@ import static org.junit.Assert.assertEquals;
  * comments.
  */
 public class SAPTest {
-    String digraph1 = "C:/projects/git/github/algo/algo/testfiles/wordnet/digraph1.txt";
-    String digraph2 = "C:/projects/git/github/algo/algo/testfiles/wordnet/digraph2.txt";
+    String digraph1 = "./testfiles/wordnet/digraph1.txt";
+    String digraph2 = "./testfiles/wordnet/digraph2.txt";
 
     private SAP loadDigraph(String fileName) {
         In in = new In(fileName);

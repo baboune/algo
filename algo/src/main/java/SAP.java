@@ -17,7 +17,9 @@
  */
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Shortest Ancestral Path.
@@ -25,11 +27,16 @@ import java.util.Arrays;
 public class SAP {
     private final Digraph G;
     private final int nbVertices;
+    private final List<Integer> roots = new ArrayList<Integer>();
 
     // constructor takes a digraph (not necessarily a DAG)
     public SAP(Digraph G) {
         this.G = G;
         this.nbVertices = this.G.V();
+
+        // , the root node cannot have any incoming edges and the other nodes can only have one incoming edge
+        // For optimizations compute the root (s) outside and only once.
+
     }
 
     // length of shortest ancestral path between v and w; -1 if no such path
@@ -55,12 +62,16 @@ public class SAP {
         BreadthFirstDirectedPaths bfdpV = new BreadthFirstDirectedPaths(G, v);
         BreadthFirstDirectedPaths bfdpW = new BreadthFirstDirectedPaths(G, w);
 
-        // All vertices on path to guaranteed ancestor -> 0
-        // This might be a limiting hypothesis but it will work with WordNet
-        Iterable<Integer> pathToV = bfdpV.pathTo(0);
-        for (int z : pathToV) {
-            if (bfdpW.hasPathTo(z)) {
-                return bfdpV.distTo(z) + bfdpW.distTo(z);
+
+        for (int root = 0; root < nbVertices; root++) {
+            // Is this a possible root?
+            if (bfdpV.hasPathTo(root) && bfdpW.hasPathTo(root)) {
+                Iterable<Integer> pathToV = bfdpV.pathTo(root);
+                for (int z : pathToV) {
+                    if (bfdpW.hasPathTo(z)) {
+                        return bfdpV.distTo(z) + bfdpW.distTo(z);
+                    }
+                }
             }
         }
         return -1;
@@ -73,12 +84,15 @@ public class SAP {
         BreadthFirstDirectedPaths bfdpV = new BreadthFirstDirectedPaths(G, v);
         BreadthFirstDirectedPaths bfdpW = new BreadthFirstDirectedPaths(G, w);
 
-        // All vertices on path to guaranteed ancestor -> 0
-        // This might be a limiting hypothesis but it will work with WordNet
-        Iterable<Integer> pathToV = bfdpV.pathTo(0);
-        for (int z : pathToV) {
-            if (bfdpW.hasPathTo(z)) {
-                return z;
+        for (int root = 0; root < nbVertices; root++) {
+            // Is this a possible root?
+            if (bfdpV.hasPathTo(root) && bfdpW.hasPathTo(root)) {
+                Iterable<Integer> pathToV = bfdpV.pathTo(root);
+                for (int z : pathToV) {
+                    if (bfdpW.hasPathTo(z)) {
+                        return z;
+                    }
+                }
             }
         }
         return -1;
