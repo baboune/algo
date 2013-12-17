@@ -83,4 +83,11 @@ public class SAPTest {
         SAP sap = loadDigraph(digraph2);
         assertEquals(2, sap.length(1, 3));
     }
+
+    @org.junit.Test
+    public void testDigraph1Trial91() {
+        SAP sap = loadDigraph(digraph1);
+        assertEquals(3, sap.length(12, 1));
+    }
+
 }

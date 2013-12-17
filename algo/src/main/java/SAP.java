@@ -17,11 +17,7 @@
  */
 
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Shortest Ancestral Path.
@@ -29,22 +25,12 @@ import java.util.Map;
 public class SAP {
     private final Digraph G;
     private final int nbVertices;
-    private final List<Integer> roots = new ArrayList<Integer>();
-    private final Map<Integer, BreadthFirstDirectedPaths> bfdps = new HashMap<Integer, BreadthFirstDirectedPaths>();
 
     // constructor takes a digraph (not necessarily a DAG)
     public SAP(Digraph G) {
         this.G = G;
         this.nbVertices = this.G.V();
 
-        // , the root node cannot have any incoming edges and the other nodes can only have one incoming edge
-        // For optimizations compute the root (s) outside and only once.
-        for (int v = 0; v < G.V(); v++) {
-            if (!G.adj(v).iterator().hasNext()) {
-                roots.add(v);
-                //System.out.println("Found possible root: " + v);
-            }
-        }
     }
 
     // length of shortest ancestral path between v and w; -1 if no such path
@@ -98,7 +84,7 @@ public class SAP {
 
         for (Integer integer : ancestors) {
             if ((bfdpV.distTo(integer) + bfdpW.distTo(integer)) < path) {
-                path = (bfdpV.distTo(integer) + bfdpV.distTo(integer));
+                path = (bfdpV.distTo(integer) + bfdpW.distTo(integer));
                 ancestor = integer;
             }
         }
