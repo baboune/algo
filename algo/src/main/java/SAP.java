@@ -19,7 +19,9 @@
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Shortest Ancestral Path.
@@ -28,6 +30,7 @@ public class SAP {
     private final Digraph G;
     private final int nbVertices;
     private final List<Integer> roots = new ArrayList<Integer>();
+    private final Map<Integer, BreadthFirstDirectedPaths> bfdps = new HashMap<Integer, BreadthFirstDirectedPaths>();
 
     // constructor takes a digraph (not necessarily a DAG)
     public SAP(Digraph G) {
@@ -36,7 +39,12 @@ public class SAP {
 
         // , the root node cannot have any incoming edges and the other nodes can only have one incoming edge
         // For optimizations compute the root (s) outside and only once.
-
+        for (int v = 0; v < G.V(); v++) {
+            if (!G.adj(v).iterator().hasNext()) {
+                roots.add(v);
+                //System.out.println("Found possible root: " + v);
+            }
+        }
     }
 
     // length of shortest ancestral path between v and w; -1 if no such path
@@ -59,12 +67,12 @@ public class SAP {
     public int length(Iterable<Integer> v, Iterable<Integer> w) {
         checkBoundaries(v, "v");
         checkBoundaries(w, "w");
+
         BreadthFirstDirectedPaths bfdpV = new BreadthFirstDirectedPaths(G, v);
         BreadthFirstDirectedPaths bfdpW = new BreadthFirstDirectedPaths(G, w);
 
-
-        for (int root = 0; root < nbVertices; root++) {
-            // Is this a possible root?
+        // Reuse known roots
+        for (int root : roots) {
             if (bfdpV.hasPathTo(root) && bfdpW.hasPathTo(root)) {
                 Iterable<Integer> pathToV = bfdpV.pathTo(root);
                 for (int z : pathToV) {
@@ -74,6 +82,7 @@ public class SAP {
                 }
             }
         }
+
         return -1;
     }
 

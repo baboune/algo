@@ -23,8 +23,8 @@ import java.util.Map;
  * comments.
  */
 public class WordNet {
-    private Map<Integer, String> id2Synset = new HashMap<Integer, String>();
-    private Map<String, Bag<Integer>> nouns2Ids = new HashMap<String, Bag<Integer>>();
+    private Map<Integer, String> idToWords = new HashMap<Integer, String>();
+    private Map<String, Bag<Integer>> wordToIds = new HashMap<String, Bag<Integer>>();
     private final SAP sap;
 
 
@@ -36,12 +36,12 @@ public class WordNet {
 
     // the set of nouns (no duplicates), returned as an Iterable
     public Iterable<String> nouns() {
-        return nouns2Ids.keySet();
+        return wordToIds.keySet();
     }
 
     // is the word a WordNet noun?
     public boolean isNoun(String word) {
-        return nouns2Ids.containsKey(word);
+        return wordToIds.containsKey(word);
     }
 
     // distance between nounA and nounB (defined below)
@@ -49,7 +49,7 @@ public class WordNet {
         verifyNoun(nounA);
         verifyNoun(nounB);
         // Map nouns to id + apply sap.length
-        return sap.length(nouns2Ids.get(nounA), nouns2Ids.get(nounB));
+        return sap.length(wordToIds.get(nounA), wordToIds.get(nounB));
     }
 
     // a synset (second field of synsets.txt) that is the common ancestor of nounA and nounB
@@ -58,8 +58,8 @@ public class WordNet {
         verifyNoun(nounA);
         verifyNoun(nounB);
         // Map nouns to id + apply sap.length
-        int ancestor = sap.ancestor(nouns2Ids.get(nounA), nouns2Ids.get(nounB));
-        return id2Synset.get(ancestor);
+        int ancestor = sap.ancestor(wordToIds.get(nounA), wordToIds.get(nounB));
+        return idToWords.get(ancestor);
     }
 
     private void readSynsets(String synsetsFile) {
@@ -69,13 +69,13 @@ public class WordNet {
             String[] tokens = input.readLine().split(",");
 
             int id = Integer.parseInt(tokens[0]);
-            id2Synset.put(id, tokens[1]);
+            idToWords.put(id, tokens[1]);
             String[] synset = tokens[1].split(" ");
             for (String noun : synset) {
-                Bag<Integer> bag = nouns2Ids.get(noun);
+                Bag<Integer> bag = wordToIds.get(noun);
                 if (bag == null) {
                     bag = new Bag<Integer>();
-                    nouns2Ids.put(noun, bag);
+                    wordToIds.put(noun, bag);
                 }
                 bag.add(id);
             }
@@ -85,12 +85,12 @@ public class WordNet {
 
     private void verifyNoun(String noun) {
         if (!isNoun(noun)) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(noun);
         }
     }
 
     private Digraph readHypernyms(String hypernymsFile) {
-        Digraph digraph = new Digraph(id2Synset.size());
+        Digraph digraph = new Digraph(idToWords.size());
         In input = new In(hypernymsFile);
 
         while (input.hasNextLine()) {
@@ -103,9 +103,36 @@ public class WordNet {
 
         input.close();
 
-        //verifyCycle(digraph);
-        //verifyRoot(digraph);
+        checkCycle(digraph);
+        checkIfRootedDAG(digraph);
         return digraph;
+    }
+
+    private void checkCycle(Digraph digraph) {
+
+        DirectedCycle cycle = new DirectedCycle(digraph);
+        if (cycle.hasCycle()) {
+            throw new IllegalArgumentException("Not a valid DAG");
+        }
+    }
+
+    /**
+     * "An acyclic graph is said to be rooted if exactly one of its nodes, called the root , has no predecessors"
+     */
+    private void checkIfRootedDAG(Digraph digraph) {
+        boolean gotOne = false;
+        for (int v = 0; v < digraph.V(); v++) {
+            if (!digraph.adj(v).iterator().hasNext()) {
+                if (gotOne)
+                    throw new IllegalArgumentException("Multiple roots");
+                else
+                    gotOne = true;
+            }
+        }
+        if (!gotOne) {
+            throw new IllegalArgumentException("No root");
+        }
+
     }
 
     // for unit testing of this class
