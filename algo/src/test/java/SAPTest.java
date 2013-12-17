@@ -46,7 +46,16 @@ public class SAPTest {
 
         assertEquals(-1, sap.ancestor(1, 6));
         assertEquals(-1, sap.length(1, 6));
+
+
     }
+
+    @org.junit.Test
+    public void testDigraph1SameNode() {
+        SAP sap = loadDigraph(digraph1);
+        assertEquals(0, sap.length(3, 3));
+    }
+
 
     @org.junit.Test
     public void testDigraph2() {
@@ -55,6 +64,7 @@ public class SAPTest {
         assertEquals(2, sap.length(1, 5));
         assertEquals(0, sap.ancestor(1, 5));
     }
+
 
     @org.junit.Test(expected = IllegalArgumentException.class)
     public void testAncestorBoundaries() {
@@ -66,5 +76,11 @@ public class SAPTest {
     public void testLengthBoundaries() {
         SAP sap = loadDigraph(digraph1);
         sap.length(3, 14);
+    }
+
+    @org.junit.Test
+    public void testDigraph2Trial7() {
+        SAP sap = loadDigraph(digraph2);
+        assertEquals(2, sap.length(1, 3));
     }
 }

@@ -50,7 +50,7 @@ public class SAP {
     // length of shortest ancestral path between v and w; -1 if no such path
     public int length(int v, int w) {
         if (v == w) {
-            return 1;
+            return 0;
         }
         return length(Arrays.asList(v), Arrays.asList(w));
     }
@@ -68,22 +68,15 @@ public class SAP {
         checkBoundaries(v, "v");
         checkBoundaries(w, "w");
 
+        int ancestor = ancestor(v, w);
+
         BreadthFirstDirectedPaths bfdpV = new BreadthFirstDirectedPaths(G, v);
         BreadthFirstDirectedPaths bfdpW = new BreadthFirstDirectedPaths(G, w);
 
-        // Reuse known roots
-        for (int root : roots) {
-            if (bfdpV.hasPathTo(root) && bfdpW.hasPathTo(root)) {
-                Iterable<Integer> pathToV = bfdpV.pathTo(root);
-                for (int z : pathToV) {
-                    if (bfdpW.hasPathTo(z)) {
-                        return bfdpV.distTo(z) + bfdpW.distTo(z);
-                    }
-                }
-            }
+        if (ancestor == -1) {
+            return -1;
         }
-
-        return -1;
+        return bfdpV.distTo(ancestor) + bfdpW.distTo(ancestor);
     }
 
     // a common ancestor that participates in shortest ancestral path; -1 if no such path
@@ -93,25 +86,35 @@ public class SAP {
         BreadthFirstDirectedPaths bfdpV = new BreadthFirstDirectedPaths(G, v);
         BreadthFirstDirectedPaths bfdpW = new BreadthFirstDirectedPaths(G, w);
 
-        for (int root = 0; root < nbVertices; root++) {
-            // Is this a possible root?
-            if (bfdpV.hasPathTo(root) && bfdpW.hasPathTo(root)) {
-                Iterable<Integer> pathToV = bfdpV.pathTo(root);
-                for (int z : pathToV) {
-                    if (bfdpW.hasPathTo(z)) {
-                        return z;
-                    }
-                }
+        int ancestor = -1;
+        int path = Integer.MAX_VALUE;
+        Bag<Integer> ancestors = new Bag<Integer>();
+
+        for (int i = 0; i < nbVertices; i++) {
+            if (bfdpV.hasPathTo(i) && bfdpW.hasPathTo(i)) {
+                ancestors.add(i);
             }
         }
-        return -1;
+
+        for (Integer integer : ancestors) {
+            if ((bfdpV.distTo(integer) + bfdpW.distTo(integer)) < path) {
+                path = (bfdpV.distTo(integer) + bfdpV.distTo(integer));
+                ancestor = integer;
+            }
+        }
+        return ancestor;
     }
 
-    private void checkBoundaries(Iterable<Integer> bs, String c) {
-        for (int b : bs) {
-            if (b < 0 || b > (nbVertices - 1)) {
-                throw new IllegalArgumentException(c + " is oor");
-            }
+    private void checkBoundaries(int v, String c) {
+        if (v < 0 || v > (nbVertices - 1)) {
+            throw new IllegalArgumentException(c + " is oor");
+        }
+
+    }
+
+    private void checkBoundaries(Iterable<Integer> vs, String c) {
+        for (int v : vs) {
+            checkBoundaries(v, c);
         }
     }
 
