@@ -107,7 +107,7 @@ public class SAP {
 
     private void checkBoundaries(int v, String c) {
         if (v < 0 || v > (nbVertices - 1)) {
-            throw new IllegalArgumentException(c + " is oor");
+            throw new IndexOutOfBoundsException(c + " is oor");
         }
 
     }

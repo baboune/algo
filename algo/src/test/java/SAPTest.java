@@ -66,13 +66,13 @@ public class SAPTest {
     }
 
 
-    @org.junit.Test(expected = IllegalArgumentException.class)
+    @org.junit.Test(expected = IndexOutOfBoundsException.class)
     public void testAncestorBoundaries() {
         SAP sap = loadDigraph(digraph1);
         sap.ancestor(3, 14);
     }
 
-    @org.junit.Test(expected = IllegalArgumentException.class)
+    @org.junit.Test(expected = IndexOutOfBoundsException.class)
     public void testLengthBoundaries() {
         SAP sap = loadDigraph(digraph1);
         sap.length(3, 14);
